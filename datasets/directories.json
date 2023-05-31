@@ -1,0 +1,8 @@
+{
+    "train": ["jena/", "zurich/", "weimar/", "ulm/", "tubingen/", "stuttgart/",
+    "strasbourg/", "monchengladbach/", "krefeld/", "hanover/",
+    "hamburg/", "erfurt/", "dusseldorf/", "darmstadt/", "cologne/",
+    "bremen/", "bochum/", "aachen/"],
+    "val": ["frankfurt/", "munster/", "lindau/"],
+    "test": ["berlin", "bielefeld", "bonn", "leverkusen", "mainz", "munich"]
+}
