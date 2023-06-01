@@ -1,1 +1,1 @@
-from .deeplab import DeepLab
+from .model_wrapper import ModelWrapper

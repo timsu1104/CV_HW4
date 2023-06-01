@@ -15,8 +15,12 @@ def arg_parse():
     parser.add_argument('--output_stride', type=int, default=16, help='output_stride (8 or 16)')
     
     # training
-    parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate')
+    parser.add_argument('--epochs', type=int, default=200, help='Learning rate')
+    parser.add_argument('--lr_start', type=float, default=5e-3, help='Learning rate')
+    parser.add_argument('--lr_final', type=float, default=5e-5, help='Learning rate')
     parser.add_argument('--wd', type=float, default=1e-4, help='Weight decay')
+    parser.add_argument('--alpha', type=float, default=0.25, help='Weight decay')
+    parser.add_argument('--gamma', type=float, default=2, help='Weight decay')
     
     args = parser.parse_args()
     return args
