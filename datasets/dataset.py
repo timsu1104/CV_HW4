@@ -15,7 +15,7 @@ cityscapes_data_path = "./data"
 assert os.path.exists(cityscapes_data_path)
 
 class CityscapesDataset(Dataset):
-    def __init__(self, cityscapes_data_path, augment: bool):
+    def __init__(self, cityscapes_data_path, split: str, augment: bool):
         super().__init__()
         
         self.img_h = 1024
@@ -30,26 +30,25 @@ class CityscapesDataset(Dataset):
 
         self.file_names = []
         
-        for split in ["train", "val"]:
-            region_split = regions[split]
-                
-            self.img_dir = os.path.join(cityscapes_data_path, f"leftImg8bit/{split}/")
-            self.label_dir = os.path.join(cityscapes_data_path, f"gtFine/{split}/")
-            for region in region_split:
-                data_path = os.path.join(self.img_dir, region)
-                label_root = os.path.join(self.label_dir, region)
-                
-                for file_name in os.listdir(data_path):
-                    img_id = getCoreImageFileName(file_name)
-                    img_path = os.path.join(data_path, file_name)
-                    label_path = os.path.join(label_root, img_id + "_gtFine_labelTrainIds.png")
+        region_split = regions[split]
+            
+        self.img_dir = os.path.join(cityscapes_data_path, f"leftImg8bit/{split}/")
+        self.label_dir = os.path.join(cityscapes_data_path, f"gtFine/{split}/")
+        for region in region_split:
+            data_path = os.path.join(self.img_dir, region)
+            label_root = os.path.join(self.label_dir, region)
+            
+            for file_name in os.listdir(data_path):
+                img_id = getCoreImageFileName(file_name)
+                img_path = os.path.join(data_path, file_name)
+                label_path = os.path.join(label_root, img_id + "_gtFine_labelTrainIds.png")
 
-                    fn = {
-                        "img_id": img_id,
-                        "img_path": img_path,
-                        "label_path": label_path
-                    }
-                    self.file_names.append(fn)
+                fn = {
+                    "img_id": img_id,
+                    "img_path": img_path,
+                    "label_path": label_path
+                }
+                self.file_names.append(fn)
     
     def load_and_preprocess(self, img_path):
         img = cv2.imread(img_path, -1) # (1024, 2048, 3)
@@ -106,10 +105,11 @@ class CityscapesDataset(Dataset):
         return len(self.file_names)
 
 def build_dataset(args):
-    train_dataset = CityscapesDataset(args.data_path, True)
-    val_dataset = CityscapesDataset(args.data_path, False)
+    train_dataset = CityscapesDataset(args.data_path, 'train', True)
+    val_dataset = CityscapesDataset(args.data_path, 'train', False)
+    test_dataset = CityscapesDataset(args.data_path, 'val', False)
     
-    return train_dataset, val_dataset
+    return train_dataset, val_dataset, test_dataset
 
 if __name__ == '__main__':
     build_dataset()

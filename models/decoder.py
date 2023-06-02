@@ -21,6 +21,14 @@ class Decoder(nn.Module):
             nn.Dropout(0.1),
             nn.Conv2d(256, num_classes, 1, stride=1),
         )
+        
+        # initialize weight
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight.data, nonlinearity='relu')
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1.)
+                nn.init.constant_(m.bias, 0.)
  
     def forward(self, x, low_level_features):
         low_level_features = self.conv1x1(low_level_features)

@@ -3,6 +3,9 @@ import argparse
 def arg_parse():
     parser = argparse.ArgumentParser(
         description='Cityscapes Trainer')
+    
+    parser.add_argument('--tag', type=str, default='DeepLabv3+', help='Learning rate')
+    parser.add_argument('--seed', type=int, default=42, help='Learning rate')
 
     # dataset
     parser.add_argument('--data-path', type=str, default='./data', help='Path to the dataset. ')
@@ -15,9 +18,9 @@ def arg_parse():
     parser.add_argument('--output_stride', type=int, default=16, help='output_stride (8 or 16)')
     
     # training
-    parser.add_argument('--epochs', type=int, default=200, help='Learning rate')
-    parser.add_argument('--lr_start', type=float, default=5e-3, help='Learning rate')
-    parser.add_argument('--lr_final', type=float, default=5e-5, help='Learning rate')
+    parser.add_argument('--epochs', type=int, default=300, help='Learning rate')
+    parser.add_argument('--lr_start', type=float, default=3e-3, help='Learning rate')
+    parser.add_argument('--lr_final', type=float, default=3e-5, help='Learning rate')
     parser.add_argument('--wd', type=float, default=1e-4, help='Weight decay')
     parser.add_argument('--alpha', type=float, default=0.25, help='Weight decay')
     parser.add_argument('--gamma', type=float, default=2, help='Weight decay')
