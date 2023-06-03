@@ -43,6 +43,12 @@ class ModelWrapper(pl.LightningModule):
         self.criterion = FocalLoss(alpha, gamma, ignore_index=255)
         self.train_metric = JaccardIndex(task = 'multiclass', num_classes=num_classes, ignore_index=255, average='macro')
         self.val_metric = JaccardIndex(task = 'multiclass', num_classes=num_classes, ignore_index=255, average='macro')
+        
+        self.best_train_pixel_acc = 0
+        self.best_val_pixel_acc = 0
+        self.best_train_miou = 0
+        self.best_val_miou = 0
+        
         self.save_hyperparameters()
     
     # def get_iou(self, pred: torch.Tensor, gt: torch.Tensor):
@@ -68,14 +74,19 @@ class ModelWrapper(pl.LightningModule):
         loss = self.criterion(out_img, label)
         pred = out_img.max(1)[1]
         pixel_acc = torch.sum(pred == label) / label.numel()
+        self.best_train_pixel_acc = max(pixel_acc, self.best_train_pixel_acc)
         self.log("train/loss", loss, sync_dist=True)
         self.log("train/pixel_acc", pixel_acc, sync_dist=True)
+        self.log("train/best_pixel_acc", self.best_train_pixel_acc, sync_dist=True)
         self.train_metric.update(pred, label)
         return loss
     
     def on_train_epoch_end(self):
         # log epoch metric
-        self.log('train/mIoU', self.train_metric.compute(), sync_dist=True)
+        miou = self.train_metric.compute()
+        self.best_train_miou = max(miou, self.best_train_miou)
+        self.log('train/mIoU', miou, sync_dist=True)
+        self.log('train/best_mIoU', self.best_train_miou, sync_dist=True)
         self.train_metric.reset()
     
     def validation_step(self, batch, batch_idx):
@@ -84,13 +95,18 @@ class ModelWrapper(pl.LightningModule):
         loss = self.criterion(out_img, label)
         pred = out_img.max(1)[1]
         pixel_acc = torch.sum(pred == label) / label.numel()
+        self.best_val_pixel_acc = max(pixel_acc, self.best_val_pixel_acc)
         self.log("val/loss", loss, sync_dist=True)
         self.log("val/pixel_acc", pixel_acc, sync_dist=True)
+        self.log("val/best_pixel_acc", self.best_val_pixel_acc, sync_dist=True)
         self.val_metric.update(pred, label)
         
     def on_validation_epoch_end(self):
         # log epoch metric
-        self.log('val/mIoU', self.val_metric.compute(), sync_dist=True)
+        miou = self.val_metric.compute()
+        self.best_val_miou = max(miou, self.best_val_miou)
+        self.log('val/mIoU', miou, sync_dist=True)
+        self.log('val/best_mIoU', self.best_val_miou, sync_dist=True)
         self.val_metric.reset()
 
     def configure_optimizers(self):
