@@ -6,6 +6,7 @@ def arg_parse():
     
     parser.add_argument('--tag', type=str, default='DeepLabv3+', help='Learning rate')
     parser.add_argument('--seed', type=int, default=42, help='Learning rate')
+    parser.add_argument('--gpus', type=str, default='0', help='GPUs to use. Set for CUDA_VISIBLE_DEVICES')
 
     # dataset
     parser.add_argument('--data-path', type=str, default='./data', help='Path to the dataset. ')
@@ -24,6 +25,8 @@ def arg_parse():
     parser.add_argument('--wd', type=float, default=1e-4, help='Weight decay')
     parser.add_argument('--alpha', type=float, default=0.25, help='Weight decay')
     parser.add_argument('--gamma', type=float, default=2, help='Weight decay')
+    
+    parser.add_argument('--test', action='store_true', help='Whether to use the original train-val split. ')
     
     args = parser.parse_args()
     return args

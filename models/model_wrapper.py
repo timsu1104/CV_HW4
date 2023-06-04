@@ -26,7 +26,6 @@ class ModelWrapper(pl.LightningModule):
     def __init__(
         self, 
         num_classes, 
-        class_weight: torch.Tensor,
         epochs: int=1000,
         lr_start=1e-3,
         lr_final=1e-5,
@@ -39,7 +38,6 @@ class ModelWrapper(pl.LightningModule):
         super(ModelWrapper, self).__init__()
         self.model = DeepLab(num_classes, backbone=backbone, output_stride=output_stride)
         self.num_classes = num_classes
-        self.class_weight = class_weight.cuda()
         self.criterion = FocalLoss(alpha, gamma, ignore_index=255)
         self.train_metric = JaccardIndex(task = 'multiclass', num_classes=num_classes, ignore_index=255, average='macro')
         self.val_metric = JaccardIndex(task = 'multiclass', num_classes=num_classes, ignore_index=255, average='macro')
