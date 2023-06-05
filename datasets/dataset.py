@@ -1,9 +1,7 @@
-# camera-ready
-
 # https://github.com/fregu856/deeplabv3/blob/master/datasets.py
 
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 
 import numpy as np
 import cv2
@@ -51,7 +49,7 @@ class CityscapesDataset(Dataset):
                 self.file_names.append(fn)
     
     def load_and_preprocess(self, img_path):
-        img = cv2.imread(img_path, -1) # (1024, 2048, 3)
+        img = cv2.imread(img_path, cv2.IMREAD_UNCHANGED) # (1024, 2048, 3)
         img = cv2.resize(img, (self.new_img_w, self.new_img_h), interpolation=cv2.INTER_NEAREST) # (512, 1024, 3)
         return img
 

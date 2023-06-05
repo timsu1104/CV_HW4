@@ -49,23 +49,6 @@ class ModelWrapper(pl.LightningModule):
         
         self.save_hyperparameters()
     
-    # def get_iou(self, pred: torch.Tensor, gt: torch.Tensor):
-    #     """
-    #     pred: (B, H, W)
-    #     gt: (B, H, W)
-    #     """
-    #     iou = []
-    #     for label in range(self.num_classes):
-    #         pred_mask = pred == label
-    #         gt_mask = gt == label
-    #         tp = torch.sum(pred_mask * gt_mask)
-    #         fp = torch.sum(pred_mask) - tp
-    #         tn = torch.sum(gt_mask) - tp
-    #         denom = tp + fp + tn
-    #         if denom > 0:
-    #             iou[label] = tp / denom
-    #     return torch.mean(iou)
-    
     def training_step(self, batch, batch_idx):
         image, label = batch
         out_img = self.model(image)
@@ -106,6 +89,26 @@ class ModelWrapper(pl.LightningModule):
         self.log('val/mIoU', miou, sync_dist=True)
         self.log('val/best_mIoU', self.best_val_miou, sync_dist=True)
         self.val_metric.reset()
+        
+    def test_step(self, batch, batch_idx):
+        image, label = batch
+        out_img = self.model(image)
+        loss = self.criterion(out_img, label)
+        pred = out_img.max(1)[1]
+        pixel_acc = torch.sum(pred == label) / label.numel()
+        self.log("pixel_acc", pixel_acc, sync_dist=True)
+        self.val_metric.update(pred, label)
+    
+    def on_test_epoch_end(self):
+        miou = self.val_metric.compute()
+        self.log('mIoU', miou, sync_dist=True)
+        self.val_metric.reset()
+    
+    def forward(self, batch):
+        image, _ = batch
+        out_img = self.model(image)
+        pred = out_img.max(1)[1]
+        return pred
 
     def configure_optimizers(self):
         optimizer = optim.AdamW(
